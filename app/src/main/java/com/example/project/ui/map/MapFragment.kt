@@ -35,9 +35,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Set a marker at a sample location and move the camera
-        val sampleLocation = LatLng(-34.0, 151.0) // Replace with desired coordinates
-        mMap.addMarker(MarkerOptions().position(sampleLocation).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sampleLocation, 10f))
+        // Set a marker at Vancouver and move the camera
+        val vancouver = LatLng(49.2827, -123.1207) // Coordinates for Vancouver
+        mMap.addMarker(MarkerOptions().position(vancouver).title("Marker in Vancouver"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, 10f)) // Adjust zoom level as needed
     }
 }
