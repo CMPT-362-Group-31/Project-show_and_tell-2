@@ -69,6 +69,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name="com.example.project.ui.email.EmailActivity"
+            android:theme="@style/Theme.Project.NoActionBar"
+            android:parentActivityName=".ui.worksheet.EditWorksheetActivity">
+        </activity>
 
 
 

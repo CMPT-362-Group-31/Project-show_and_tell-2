@@ -88,7 +88,20 @@
         android:layout_height="match_parent"
         android:padding="16dp"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        />
+    <TextView
+    android:id="@+id/emptyState"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="No worksheets available"
+    android:visibility="gone"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="64dp"
+    android:layout_margin="16dp" />
 
     <!-- FAB for creating new worksheet -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -99,5 +112,6 @@
         android:layout_margin="16dp"
         android:contentDescription="Create new worksheet"
         app:srcCompat="@drawable/ic_add"/>
+        <!-- Empty state view -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

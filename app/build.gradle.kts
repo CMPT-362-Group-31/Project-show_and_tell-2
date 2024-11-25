@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id ("kotlin-parcelize")
 }
 
 android {
@@ -17,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -37,7 +41,26 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}" // 添加的资源冲突解决代码
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+        }
+    }
+//    packagingOptions {
+//        resources {
+//            excludes.add("META-INF/DEPENDENCIES") // Exclude the conflicting file
+//        }
+//    }
 }
 
 dependencies {
@@ -64,34 +87,42 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // Jetpack Compose dependencies
-    // https://mvnrepository.com/artifact/androidx.compose.ui/ui
-    runtimeOnly("androidx.compose.ui:ui:1.7.2")
-    // https://mvnrepository.com/artifact/androidx.compose.material/material
-    runtimeOnly("androidx.compose.material:material:1.7.0")
-    // https://mvnrepository.com/artifact/androidx.activity/activity-compose
-    runtimeOnly("androidx.activity:activity-compose:1.9.0")
-    // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-runtime-ktx
-    runtimeOnly("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    // Core AndroidX dependencies
+
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+
+    // Testing dependencies
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Additional dependencies
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.compose.ui:ui:1.6.0")
+    implementation("androidx.compose.material:material:1.6.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.activity:activity-compose:1.8.0")
+
+    // Gmail and Google Sign-In dependencies
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
+    implementation("com.google.api-client:google-api-client-android:1.33.0")
+    implementation("com.google.api-client:google-api-client-gson:1.33.0")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20231218-2.0.0")
+
+    // Added dependencies for the worksheet UI
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
 
-    // https://mvnrepository.com/artifact/com.google.android.gms/play-services-auth
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-
-    // Gmail API
-    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client-android
-    implementation("com.google.api-client:google-api-client-android:1.22.0")
-    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson
-    implementation("com.google.api-client:google-api-client-gson:1.21.0")
-    // https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail
-    implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
-
-
-    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-android
-    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-
-    implementation("androidx.compose.material:material:1.5.3")
 
 }

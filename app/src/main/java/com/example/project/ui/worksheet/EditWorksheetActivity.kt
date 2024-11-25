@@ -3,6 +3,7 @@ package com.example.project.ui.worksheet
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,6 +17,7 @@ import android.widget.Space
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project.R
+import com.example.project.ui.email.EmailActivity
 import com.example.project.ui.worksheet.dataclass.CrewInfo
 import com.example.project.ui.worksheet.dataclass.FlightInfo
 import com.example.project.ui.worksheet.dataclass.LocationInfo
@@ -184,6 +186,9 @@ class EditWorksheetActivity : AppCompatActivity() {
         btnEmail.setOnClickListener {
             Log.d(TAG, "Email button clicked")
             //Horo --> you can add the email functionality here
+            // Create an intent to start EmailActivity
+            val intent = Intent(this, EmailActivity::class.java)
+            startActivity(intent)
         }
     }
 

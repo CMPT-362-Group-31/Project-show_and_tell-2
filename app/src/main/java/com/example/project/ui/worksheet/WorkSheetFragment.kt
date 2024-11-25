@@ -1,86 +1,95 @@
-//package com.example.project.ui.worksheet
-//
-//import android.os.Bundle
-//import android.view.LayoutInflater
-//import android.view.View
-//import android.view.ViewGroup
-//import androidx.fragment.app.Fragment
-//import com.example.project.R
-//
-//class WorkSheetFragment : Fragment() {
-//    override fun onCreateView(
-//        inflater: LayoutInflater, container: ViewGroup?,
-//        savedInstanceState: Bundle?
-//    ): View? {
-//        val root = inflater.inflate(R.layout.fragment_worksheet, container, false)
-//        return root
-//    }
-//
-//}
-
 package com.example.project.ui.worksheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.project.ui.worksheet.EditWorksheetActivity
-import com.example.project.ui.worksheet.WorksheetAdapter
 import com.example.project.R
-import com.example.project.ui.worksheet.dataclass.PickupDetails
 import com.example.project.ui.worksheet.dataclass.WorksheetListItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 
-class WorkSheetFragment : Fragment() {
-
+public class WorksheetFragment : Fragment() {
     private lateinit var adapter: WorksheetAdapter
     private lateinit var searchInput: TextInputEditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddWorksheet: FloatingActionButton
+    private lateinit var emptyStateView: View
+
+    // In-memory storage of worksheets
+    private val worksheets = mutableListOf<WorksheetListItem>()
+
+    // Register activity result handler
+    private val worksheetEditorResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            result.data?.let { data ->
+                // Handle deletion
+                data.getStringExtra("DELETE_WORKSHEET")?.let { worksheetId ->
+                    worksheets.removeAll { it.id == worksheetId }
+                    updateUIState()
+                    return@let
+                }
+
+                // Handle save/update
+                data.getParcelableExtra<WorksheetListItem>("WORKSHEET_RESULT")?.let { worksheet ->
+                    val existingIndex = worksheets.indexOfFirst { it.id == worksheet.id }
+                    if (existingIndex != -1) {
+                        worksheets[existingIndex] = worksheet
+                    } else {
+                        worksheets.add(0, worksheet) // Add new worksheets at the top
+                    }
+                    updateUIState()
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val root = inflater.inflate(R.layout.fragment_worksheet, container, false)
-
-        setupViews(root)
-        setupEdgeToEdge(root)
-        loadWorksheets()
-
-        return root
+    ): View {
+        val rootView = inflater.inflate(R.layout.fragment_worksheet, container, false)
+        setupViews(rootView)
+        setupEdgeToEdge(rootView)
+        updateUIState()
+        return rootView
     }
 
-    private fun setupViews(root: View) {
+    private fun setupViews(rootView: View) {
         // Initialize views
-        recyclerView = root.findViewById(R.id.worksheetList)
-        fabAddWorksheet = root.findViewById(R.id.fabAddWorksheet)
-        searchInput = root.findViewById(R.id.searchInput)
+        recyclerView = rootView.findViewById(R.id.worksheetList)
+        fabAddWorksheet = rootView.findViewById(R.id.fabAddWorksheet)
+        searchInput = rootView.findViewById(R.id.searchInput)
+        emptyStateView = rootView.findViewById(R.id.emptyState)
 
-        // Setup RecyclerView with adapter
+        // Setup RecyclerView
         adapter = WorksheetAdapter { worksheet ->
             openWorksheetEditor(worksheet)
         }
         recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@WorkSheetFragment.adapter
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@WorksheetFragment.adapter
         }
 
-        // Setup FAB to open a blank worksheet editor
+        // Setup FAB
         fabAddWorksheet.setOnClickListener {
             openWorksheetEditor(null)
         }
 
-        // Setup search functionality
+        // Setup search
         searchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -90,10 +99,10 @@ class WorkSheetFragment : Fragment() {
         })
     }
 
-    private fun setupEdgeToEdge(root: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+    private fun setupEdgeToEdge(rootView: View) {
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
     }
@@ -101,59 +110,31 @@ class WorkSheetFragment : Fragment() {
     private fun openWorksheetEditor(worksheet: WorksheetListItem?) {
         val intent = Intent(requireContext(), EditWorksheetActivity::class.java)
         worksheet?.let {
-            intent.putExtra("WORKSHEET_ID", it.id)
+            intent.putExtra("WORKSHEET_DATA", it)
         }
-        startActivity(intent)
+        worksheetEditorResult.launch(intent)
     }
 
-    private fun loadWorksheets() {
-        // Sample data - replace with actual data source
-        val worksheets = listOf(
-            WorksheetListItem(
-                id = "W 110724002",
-                type = "Crew Pickup",
-                count = 1,
-                date = "Nov/07",
-                time = "05:30",
-                pickupDetails = PickupDetails(
-                    name = "I. GARCIA",
-                    dock = "LARFARGE",
-                    ship = "NACC POROS",
-                    from = "VANCOUVER GENERAL HOSPITAL",
-                    to = "CHATEAU"
-                )
-            ),
-            WorksheetListItem(
-                id = "W 110624001",
-                type = "Crew Pickup",
-                count = 1,
-                date = "Nov/07",
-                time = "10:15",
-                pickupDetails = PickupDetails(
-                    name = "B.TASIS C/E",
-                    dock = "",
-                    ship = "YM COURAGE",
-                    flightNumber = "CX838",
-                    flightArrival = "11:00",
-                    from = "AIRPORT",
-                    to = "CHATEAU"
-                ),
-                status = "In-Progress",
-                assignedTo = "#WILSON"
-            )
-        )
-
-        adapter.submitList(worksheets)
+    private fun updateUIState() {
+        if (worksheets.isEmpty()) {
+            recyclerView.visibility = View.GONE
+            searchInput.visibility = View.GONE
+            emptyStateView.visibility = View.VISIBLE
+        } else {
+            recyclerView.visibility = View.VISIBLE
+            searchInput.visibility = View.VISIBLE
+            emptyStateView.visibility = View.GONE
+            adapter.submitList(ArrayList(worksheets)) // Create new list to trigger DiffUtil
+        }
     }
 
     private fun filterWorksheets(query: String) {
-        val currentList = adapter.currentList
         if (query.isEmpty()) {
-            adapter.submitList(currentList)
+            adapter.submitList(ArrayList(worksheets))
             return
         }
 
-        val filteredList = currentList.filter { worksheet ->
+        val filteredList = worksheets.filter { worksheet ->
             worksheet.pickupDetails.let {
                 it.ship.contains(query, ignoreCase = true) ||
                         it.name.contains(query, ignoreCase = true) ||
@@ -163,5 +144,18 @@ class WorkSheetFragment : Fragment() {
             }
         }
         adapter.submitList(filteredList)
+
+        // Show/hide empty state based on filtered results
+        if (filteredList.isEmpty()) {
+            recyclerView.visibility = View.GONE
+            emptyStateView.visibility = View.VISIBLE
+        } else {
+            recyclerView.visibility = View.VISIBLE
+            emptyStateView.visibility = View.GONE
+        }
+    }
+
+    companion object {
+        private const val TAG = "WorksheetFragment"
     }
 }
