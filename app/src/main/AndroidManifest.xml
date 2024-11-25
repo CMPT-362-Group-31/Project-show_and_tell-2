@@ -59,6 +59,17 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <activity
+            android:name="com.abdinajib_idle.worksheet.EditWorksheetActivity"
+            android:theme="@style/Theme.Project.NoActionBar"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
 
     </application>
 

@@ -11,4 +11,34 @@
     <string name="menu_WorkSheet">WorkSheet</string>
     <string name="menu_Map">Map</string>
     <string name="menu_DriverManager">Driver Manager</string>
+
+<!--    <string name="app_name">Worksheet</string>-->
+    <string name="edit_worksheet">Edit Worksheet</string>
+    <string name="action_date">Action Date</string>
+    <string name="time">Time</string>
+    <string name="driver_pickup">What Is The Driver Picking Up?</string>
+    <string name="crew">Crew</string>
+    <string name="_package">Package</string>
+    <string name="ship_name">Ship Name</string>
+    <string name="agent_name">Agent\'s Name</string>
+    <string name="shipping_company">Shipping Company Name</string>
+    <string name="dock">Dock</string>
+    <string name="type_of_crew">Type Of Crew</string>
+    <string name="off_signers">Off Signers</string>
+    <string name="on_signers">On Signers</string>
+    <string name="other_kind">Other Kind</string>
+    <string name="number_of_people">Number Of People</string>
+    <string name="flight_number">Flight #</string>
+    <string name="arrival_time">Arrival Time</string>
+    <string name="departure_time">Depature Time</string>
+    <string name="pickup_location">Pickup Location</string>
+    <string name="dropoff_location">Drop-off Location</string>
+    <string name="additional_stops">Additional Stops</string>
+    <string name="additional_delivery_remark">Additional Delivery Remark</string>
+    <string name="job_start_time">Job Start Time</string>
+    <string name="job_finish_time">Job Finish Time</string>
+    <string name="delete">Delete</string>
+    <string name="save_picture">Save Picture</string>
+    <string name="reset">Reset</string>
+    <string name="save">Save</string>
 </resources>

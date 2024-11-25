@@ -1,15 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
-        android:icon="@drawable/ic_home"  
+        android:icon="@drawable/ic_home"
         android:title="Home" />
     <item
         android:id="@+id/nav_map"
-        android:icon="@drawable/ic_map"  
+        android:icon="@drawable/ic_map"
         android:title="Map" />
     <item
         android:id="@+id/nav_worksheet"
-        android:icon="@drawable/ic_worksheet"  
+        android:icon="@drawable/ic_worksheet"
         android:title="Worksheet" />
     <item
         android:id="@+id/nav_drivermanager"
