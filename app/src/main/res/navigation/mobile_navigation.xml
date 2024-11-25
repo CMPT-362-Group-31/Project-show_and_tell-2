@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.project.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_map"
+        android:name="com.example.project.ui.map.MapFragment"
+        android:label="@string/menu_Map"
+        tools:layout="@layout/fragment_map">
+        <!-- add nav_map to nav_worksheet nav -->
+        <action
+            android:id="@+id/action_map_to_worksheet"
+            app:destination="@id/nav_worksheet" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_worksheet"
+        android:name="com.example.project.ui.worksheet.WorkSheetFragment"
+        android:label="@string/menu_WorkSheet"
+        tools:layout="@layout/fragment_worksheet" />
+
+    <fragment
+        android:id="@+id/nav_drivermanager"
+        android:name="com.example.project.ui.drivermanager.DriverManagerFragment"
+        android:label="@string/menu_DriverManager"
+        tools:layout="@layout/fragment_drivermanager">
+    <action
+        android:id="@+id/action_driverManagerFragment_to_homeFragment"
+        app:destination="@id/nav_home" />
+    </fragment>
+
+</navigation>
