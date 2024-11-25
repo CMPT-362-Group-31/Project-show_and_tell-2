@@ -32,8 +32,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.abdinajib_idle.worksheet.EditWorksheetActivity
-import com.abdinajib_idle.worksheet.WorksheetAdapter
+import com.example.project.ui.worksheet.EditWorksheetActivity
+import com.example.project.ui.worksheet.WorksheetAdapter
 import com.example.project.R
 import com.example.project.ui.worksheet.dataclass.PickupDetails
 import com.example.project.ui.worksheet.dataclass.WorksheetListItem

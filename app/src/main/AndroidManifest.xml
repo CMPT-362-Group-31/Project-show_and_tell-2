@@ -60,7 +60,7 @@
             android:foregroundServiceType="location" />
 
         <activity
-            android:name="com.abdinajib_idle.worksheet.EditWorksheetActivity"
+            android:name="com.example.project.ui.worksheet.EditWorksheetActivity"
             android:theme="@style/Theme.Project.NoActionBar"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity">
@@ -69,6 +69,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
 
 
     </application>

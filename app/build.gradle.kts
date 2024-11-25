@@ -63,4 +63,35 @@ dependencies {
     implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Jetpack Compose dependencies
+    // https://mvnrepository.com/artifact/androidx.compose.ui/ui
+    runtimeOnly("androidx.compose.ui:ui:1.7.2")
+    // https://mvnrepository.com/artifact/androidx.compose.material/material
+    runtimeOnly("androidx.compose.material:material:1.7.0")
+    // https://mvnrepository.com/artifact/androidx.activity/activity-compose
+    runtimeOnly("androidx.activity:activity-compose:1.9.0")
+    // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-runtime-ktx
+    runtimeOnly("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+
+
+    // https://mvnrepository.com/artifact/com.google.android.gms/play-services-auth
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+
+    // Gmail API
+    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client-android
+    implementation("com.google.api-client:google-api-client-android:1.22.0")
+    // https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson
+    implementation("com.google.api-client:google-api-client-gson:1.21.0")
+    // https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail
+    implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
+
+
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-android
+    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+
+    implementation("androidx.compose.material:material:1.5.3")
+
 }

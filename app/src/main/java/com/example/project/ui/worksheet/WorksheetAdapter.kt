@@ -1,4 +1,4 @@
-package com.abdinajib_idle.worksheet
+package com.example.project.ui.worksheet
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project.R
+import com.example.project.ui.worksheet.WorksheetDiffCallback
 import com.example.project.ui.worksheet.dataclass.WorksheetListItem
 
 class WorksheetAdapter(
@@ -61,10 +62,3 @@ class WorksheetAdapter(
     }
 }
 
-class WorksheetDiffCallback : DiffUtil.ItemCallback<WorksheetListItem>() {
-    override fun areItemsTheSame(oldItem: WorksheetListItem, newItem: WorksheetListItem) =
-        oldItem.id == newItem.id
-
-    override fun areContentsTheSame(oldItem: WorksheetListItem, newItem: WorksheetListItem) =
-        oldItem == newItem
-}

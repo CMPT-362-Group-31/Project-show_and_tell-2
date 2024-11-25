@@ -1,4 +1,4 @@
-package com.abdinajib_idle.worksheet
+package com.example.project.ui.worksheet
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
@@ -16,6 +16,11 @@ import android.widget.Space
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project.R
+import com.example.project.ui.worksheet.dataclass.CrewInfo
+import com.example.project.ui.worksheet.dataclass.FlightInfo
+import com.example.project.ui.worksheet.dataclass.LocationInfo
+import com.example.project.ui.worksheet.dataclass.ShipInfo
+import com.example.project.ui.worksheet.dataclass.WorksheetData
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -312,38 +317,5 @@ class EditWorksheetActivity : AppCompatActivity() {
     }
 }
 
-// Data classes
 
-data class WorksheetData(
-    val dateTime: Pair<String, String>,
-    val pickupType: String,
-    val shipInfo: ShipInfo,
-    val crewType: CrewInfo,
-    val flightDetails: FlightInfo,
-    val locationDetails: LocationInfo,
-    val additionalDetails: String,
-    val jobTimes: Pair<String, String>
-)
 
-data class ShipInfo(
-    val shipName: String,
-    val agentName: String,
-    val company: String,
-    val dock: String
-)
-
-data class CrewInfo(
-    val type: String,
-    val numberOfPeople: Int
-)
-
-data class FlightInfo(
-    val flightNumber: String,
-    val arrivalTime: String,
-    val departureTime: String
-)
-
-data class LocationInfo(
-    val pickupLocation: String,
-    val dropoffLocation: String
-)
