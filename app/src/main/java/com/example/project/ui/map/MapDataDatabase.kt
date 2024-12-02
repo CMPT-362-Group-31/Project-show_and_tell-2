@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [MapData::class], version = 2, exportSchema = false)
+@Database(entities = [MapData::class], version = 3, exportSchema = false)
+@TypeConverters(MapDataConverters::class)
 abstract class MapDataDatabase : RoomDatabase() {
     abstract fun mapDataDao(): MapDataDao
 
@@ -17,9 +19,16 @@ abstract class MapDataDatabase : RoomDatabase() {
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Add migration logic if necessary. Example:
-                // database.execSQL("ALTER TABLE MapData_table ADD COLUMN newColumn TEXT")
-                // If no changes are required, leave this empty.
+                // Example migration logic for version 1 to 2
+                // You can leave this empty if no changes were made in version 2
+            }
+        }
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "ALTER TABLE MapData_table ADD COLUMN another_column_name INTEGER NOT NULL DEFAULT 0"
+                )
             }
         }
 
@@ -30,7 +39,7 @@ abstract class MapDataDatabase : RoomDatabase() {
                     MapDataDatabase::class.java,
                     "MapData_database"
                 )
-                    .addMigrations(MIGRATION_1_2) // For preserving data
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // Add all migrations
                     // .fallbackToDestructiveMigration() // Uncomment for development/testing
                     .build()
                 INSTANCE = instance

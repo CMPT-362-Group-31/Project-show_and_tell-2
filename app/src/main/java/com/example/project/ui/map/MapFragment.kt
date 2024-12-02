@@ -23,6 +23,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.project.R
 import com.example.project.TrackingService
+import com.example.project.Util.toFirebaseLatLngList
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -31,6 +32,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -54,6 +58,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var startButton: View
     private lateinit var updateButton: View
     private lateinit var completeButton: View
+    val database = Firebase.database
+
     private var mapData = MapData(
         id = 1,
         name = "Peter",
@@ -89,7 +95,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         startButton = view.findViewById(R.id.StartButton)
         updateButton = view.findViewById(R.id.UpdateButton)
         completeButton = view.findViewById(R.id.CompleteButton)
-
         populateRouteInfoTable()
         setupStartButton()
         setupUpdateButton()
@@ -463,23 +468,51 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private fun setupCompleteButton() {
         completeButton.setOnClickListener {
             // Finalize mapData
-            mapData = mapData.copy(pathPoints = pathPoints)
+            mapData = mapData.copy(pathPoints = pathPoints.toFirebaseLatLngList())
 
             lifecycleScope.launch(Dispatchers.IO) {
                 mapData?.let {
-                    it.pathPoints = pathPoints
+                    it.pathPoints = pathPoints.toFirebaseLatLngList()
                     mapDataViewModel.insertMapData(it)
                 }
             }
-
+            val firebaseDatabase = Firebase.database
+            val databaseReference = firebaseDatabase.reference.child("routes")
+            val firebaseData = mapOf(
+                "id" to mapData.id,
+                "name" to mapData.name,
+                "pathPoints" to pathPoints.map { mapOf("lat" to it.latitude, "lng" to it.longitude) },
+                "routes" to mapData.routeInfoList.map { routeInfo ->
+                    mapOf(
+                        "destination" to routeInfo.destination,
+                        "departureTime" to routeInfo.departureTime,
+                        "estimatedArrivalTime" to routeInfo.estimatedArrivalTime,
+                        "arrivalTime" to routeInfo.arrivalTime,
+                        "status" to routeInfo.status
+                    )
+                }
+            )
             // Show confirmation dialog
-            AlertDialog.Builder(requireContext())
-                .setTitle("Complete")
-                .setMessage("Route information saved to database successfully!")
-                .setPositiveButton("OK") { _, _ -> }
-                .show()
+            databaseReference.push().setValue(firebaseData)
+                .addOnSuccessListener {
+                    // Show confirmation dialog
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Complete")
+                        .setMessage("Route information saved to database and uploaded to Firebase successfully!")
+                        .setPositiveButton("OK") { _, _ -> }
+                        .show()
+                }
+                .addOnFailureListener { error ->
+                    // Show error dialog
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Error")
+                        .setMessage("Failed to upload data to Firebase: ${error.message}")
+                        .setPositiveButton("OK") { _, _ -> }
+                        .show()
+                }
         }
     }
+
     override fun onDestroy() {
         super.onDestroy()
         if (isServiceBound) {
