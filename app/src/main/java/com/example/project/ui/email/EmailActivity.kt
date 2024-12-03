@@ -5,19 +5,11 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,13 +26,14 @@ import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import com.google.api.services.gmail.GmailScopes
 
-class EmailActivity: AppCompatActivity() {
+class EmailActivity : AppCompatActivity() {
     private var account: GoogleSignInAccount? = null
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 注册登录回调
+        // Google sign-in launcher
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
@@ -53,16 +46,13 @@ class EmailActivity: AppCompatActivity() {
         }
 
         setContent {
-            var emailList by remember { mutableStateOf<List<String>>(emptyList()) }
+            var emailList by remember { mutableStateOf<List<Message>>(emptyList()) }
+            var selectedEmail by remember { mutableStateOf<Message?>(null) }
             var loading by remember { mutableStateOf(false) }
 
-            androidx.compose.material.Scaffold(
+            Scaffold(
                 topBar = {
-                    androidx.compose.material.TopAppBar(title = {
-                        androidx.compose.material.Text(
-                            "Email Viewer"
-                        )
-                    })
+                    TopAppBar(title = { Text("Email Viewer") })
                 },
                 content = { padding ->
                     Column(
@@ -72,34 +62,47 @@ class EmailActivity: AppCompatActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        if (emailList.isEmpty() && !loading) {
-                            androidx.compose.material.Button(onClick = {
-                                if (account == null) {
-                                    // 如果未登录，启动 Google 登录
-                                    val gso =
-                                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestEmail()
-                                            .requestScopes(Scope(GmailScopes.GMAIL_READONLY)) // 请求 Gmail 只读权限
-                                            .build()
-                                    val client = GoogleSignIn.getClient(this@EmailActivity, gso)
-                                    launcher.launch(client.signInIntent)
-                                } else {
-                                    // 如果已登录，获取邮件列表
-                                    loading = true
-                                    fetchEmails { emails ->
-                                        emailList = emails
-                                        loading = false
-                                    }
+                        when {
+                            selectedEmail != null -> {
+                                // Show detailed view for the selected email
+                                DetailedEmailView(email = selectedEmail!!) {
+                                    selectedEmail = null
                                 }
-                            }) {
-                                androidx.compose.material.Text(text = if (account == null) "Login with Gmail" else "Show Emails")
                             }
-                        } else if (loading) {
-                            androidx.compose.material.CircularProgressIndicator()
-                        } else {
-                            LazyColumn {
-                                items(emailList) { email ->
-                                    EmailItem(subject = email)
+                            emailList.isEmpty() && !loading -> {
+                                Button(onClick = {
+                                    if (account == null) {
+                                        // If not signed in, launch Google sign-in
+                                        val gso =
+                                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                                .requestEmail()
+                                                .requestScopes(Scope(GmailScopes.GMAIL_READONLY)) // Request Gmail read-only scope
+                                                .build()
+                                        val client = GoogleSignIn.getClient(this@EmailActivity, gso)
+                                        launcher.launch(client.signInIntent)
+                                    } else {
+                                        // If signed in, fetch email list
+                                        loading = true
+                                        fetchEmails { emails ->
+                                            emailList = emails
+                                            loading = false
+                                        }
+                                    }
+                                }) {
+                                    Text(text = if (account == null) "Login with Gmail" else "Show Emails")
+                                }
+                            }
+                            loading -> {
+                                CircularProgressIndicator()
+                            }
+                            else -> {
+                                LazyColumn {
+                                    items(emailList) { email ->
+                                        EmailItem(
+                                            subject = email.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject",
+                                            onClick = { selectedEmail = email }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -110,9 +113,9 @@ class EmailActivity: AppCompatActivity() {
     }
 
     /**
-     * 从 Gmail API 获取邮件列表
+     * Fetches email list from Gmail API
      */
-    private fun fetchEmails(callback: (List<String>) -> Unit) {
+    private fun fetchEmails(callback: (List<Message>) -> Unit) {
         val credential = GoogleAccountCredential.usingOAuth2(
             this, listOf(GmailScopes.GMAIL_READONLY)
         )
@@ -124,16 +127,15 @@ class EmailActivity: AppCompatActivity() {
             credential
         ).setApplicationName("Email Viewer").build()
 
-        // 在后台线程中执行网络请求
+        // Perform network request in a background thread
         Thread {
             try {
                 val messages = gmailService.users().messages().list("me").execute().messages ?: emptyList()
-                val emails = messages.take(10).map { message: Message ->
-                    val fullMessage = gmailService.users().messages().get("me", message.id).execute()
-                    fullMessage.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject"
+                val detailedMessages = messages.take(10).map { message ->
+                    gmailService.users().messages().get("me", message.id).execute()
                 }
                 runOnUiThread {
-                    callback(emails)
+                    callback(detailedMessages)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -145,19 +147,49 @@ class EmailActivity: AppCompatActivity() {
     }
 
     /**
-     * 单个邮件项的 UI 组件
+     * UI component for a single email item
      */
     @Composable
-    fun EmailItem(subject: String) {
+    fun EmailItem(subject: String, onClick: () -> Unit) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-//            elevation = 4.dp
+                .padding(8.dp)
+                .clickable { onClick() }
         ) {
             Text(
                 text = subject,
                 modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+
+    /**
+     * UI component for showing detailed email view
+     */
+    @Composable
+    fun DetailedEmailView(email: Message, onBack: () -> Unit) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(onClick = onBack, modifier = Modifier.padding(bottom = 16.dp)) {
+                Text("Back")
+            }
+            Text(
+                text = "Subject: ${email.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject"}",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "From: ${email.payload.headers.find { it.name == "From" }?.value ?: "Unknown"}",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = email.snippet ?: "No content available",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
