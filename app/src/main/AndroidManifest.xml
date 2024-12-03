@@ -74,6 +74,8 @@
 <!--            android:theme="@style/Theme.Project.NoActionBar"-->
 <!--            android:parentActivityName=".ui.worksheet.EditWorksheetActivity">-->
 <!--        </activity>-->
+        <activity android:name=".ui.email.EmailActivity" />
+
 
     </application>
 

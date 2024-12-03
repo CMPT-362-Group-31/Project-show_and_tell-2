@@ -3,6 +3,7 @@ package com.example.project.ui.worksheet
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project.R
+import com.example.project.ui.email.EmailActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
@@ -32,6 +34,7 @@ class EditWorksheetFragment : Fragment() {
         }
     }
 
+    // UI components
     private lateinit var worksheetNumber: TextView
     private lateinit var editDate: TextInputEditText
     private lateinit var editTime: TextInputEditText
@@ -41,7 +44,9 @@ class EditWorksheetFragment : Fragment() {
     private lateinit var editDropoffLocation: TextInputEditText
     private lateinit var btnSave: View
     private lateinit var btnDelete: View
+    private lateinit var btnEmail: View // Added Email button
 
+    // Firestore reference
     private var worksheetId: String? = null
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -60,9 +65,12 @@ class EditWorksheetFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize UI components
         initializeViews(view)
+        // Set up listeners for UI interactions
         setupListeners()
 
+        // Load or generate worksheet data
         worksheetId?.let {
             loadWorksheetData(it)
         } ?: generateNewWorksheetId()
@@ -78,6 +86,7 @@ class EditWorksheetFragment : Fragment() {
         editDriverName = view.findViewById(R.id.edit_driver_name) // Initialize Driver Name Field
         btnSave = view.findViewById(R.id.btn_save)
         btnDelete = view.findViewById(R.id.btn_delete)
+        btnEmail = view.findViewById(R.id.btn_email) // Initialize Email button
 
         worksheetId?.let { worksheetNumber.text = it }
     }
@@ -88,6 +97,12 @@ class EditWorksheetFragment : Fragment() {
 
         btnSave.setOnClickListener { saveWorksheet() }
         btnDelete.setOnClickListener { deleteWorksheet() }
+
+        // Set click listener for Email button
+        btnEmail.setOnClickListener {
+            val intent = Intent(requireContext(), EmailActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun generateNewWorksheetId() {
