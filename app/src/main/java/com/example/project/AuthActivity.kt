@@ -52,7 +52,7 @@ class AuthActivity : AppCompatActivity() {
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        saveAccountType(selectedAccountType)
+                        saveUser(selectedAccountType,email)
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent)
                         finish()
@@ -87,9 +87,10 @@ class AuthActivity : AppCompatActivity() {
                 }
         }
     }
-    private fun saveAccountType(accountType: Int) {
+    private fun saveUser(accountType: Int,username: String) {
         sharedPreferences.edit()
             .putInt("accountType", accountType)
+            .putString("username", username)
             .apply()
     }
 }

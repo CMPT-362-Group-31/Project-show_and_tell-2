@@ -84,6 +84,8 @@ class DirectionsViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = RetrofitInstance.geocodingApi.getCoordinates(placeName, apiKey)
+                Log.e("Geocoding", "Try to fetch coordinates for $placeName")
+
                 if (response.isSuccessful && response.body()?.results?.isNotEmpty() == true) {
                     val location = response.body()!!.results.first().geometry.location
                     val latLng = LatLng(location.lat, location.lng)
