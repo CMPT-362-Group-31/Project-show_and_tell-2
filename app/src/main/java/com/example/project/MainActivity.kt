@@ -30,9 +30,13 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
 
+        if (!Util.hasAllPermissions(this)) {
+            Util.requestPermissions(this)
+        }
+
         // Configure top-level destinations
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.nav_home, R.id.nav_map, R.id.nav_worksheet,R.id.nav_drivermanager)
+            setOf(R.id.nav_home, R.id.nav_map, R.id.worksheetFragment,R.id.nav_drivermanager)
         )
 
         // Set up NavController with the ActionBar and BottomNavigationView

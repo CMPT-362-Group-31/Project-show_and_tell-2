@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_date_asc"
+        android:title="Date (Ascending)" />
+    <item
+        android:id="@+id/sort_date_desc"
+        android:title="Date (Descending)" />
+    <item
+        android:id="@+id/sort_time_asc"
+        android:title="Time (Ascending)" />
+    <item
+        android:id="@+id/sort_time_desc"
+        android:title="Time (Descending)" />
+</menu>

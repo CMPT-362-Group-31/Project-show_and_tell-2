@@ -10,6 +10,8 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.project.ui.map.FirebaseLatLng
+import com.google.android.gms.maps.model.LatLng
 
 
 object Util {
@@ -60,5 +62,23 @@ object Util {
             }
         }
     }
+    // Convert FirebaseLatLng to LatLng
+    fun FirebaseLatLng.toLatLng(): LatLng {
+        return LatLng(latitude, longitude)
+    }
 
+    // Convert LatLng to FirebaseLatLng
+    fun LatLng.toFirebaseLatLng(): FirebaseLatLng {
+        return FirebaseLatLng(latitude, longitude)
+    }
+
+    // Convert a list of FirebaseLatLng to a list of LatLng
+    fun List<FirebaseLatLng>.toLatLngList(): List<LatLng> {
+        return map { it.toLatLng() }
+    }
+
+    // Convert a list of LatLng to a list of FirebaseLatLng
+    fun List<LatLng>.toFirebaseLatLngList(): List<FirebaseLatLng> {
+        return map { it.toFirebaseLatLng() }
+    }
 }

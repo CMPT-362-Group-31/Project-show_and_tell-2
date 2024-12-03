@@ -41,4 +41,9 @@
     <string name="save_picture">Save Picture</string>
     <string name="reset">Reset</string>
     <string name="save">Save</string>
+
+    <string name="link_worksheet">Link Worksheet</string>
+    <string name="email">Email</string>
+    <string name="remove_stop">Remove Stop</string>
+    <string name="add_stop">Add Stop</string>
 </resources>

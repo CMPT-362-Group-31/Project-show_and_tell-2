@@ -31,7 +31,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Project"
         tools:targetApi="31">
-
+<!--        <uses-library android:name="com.google.android.gms" />-->
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -59,23 +59,21 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <activity
-            android:name="com.example.project.ui.worksheet.EditWorksheetActivity"
-            android:theme="@style/Theme.Project.NoActionBar"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name="com.example.project.ui.email.EmailActivity"
-            android:theme="@style/Theme.Project.NoActionBar"
-            android:parentActivityName=".ui.worksheet.EditWorksheetActivity">
-        </activity>
-
-
+<!--        <activity-->
+<!--            android:name="com.example.project.ui.worksheet.EditWorksheetActivity"-->
+<!--            android:theme="@style/Theme.Project.NoActionBar"-->
+<!--            android:screenOrientation="portrait"-->
+<!--            android:parentActivityName=".MainActivity">-->
+<!--            &lt;!&ndash; Parent activity meta-data to support 4.0 and lower &ndash;&gt;-->
+<!--            <meta-data-->
+<!--                android:name="android.support.PARENT_ACTIVITY"-->
+<!--                android:value=".MainActivity" />-->
+<!--        </activity>-->
+<!--        <activity-->
+<!--            android:name="com.example.project.ui.email.EmailActivity"-->
+<!--            android:theme="@style/Theme.Project.NoActionBar"-->
+<!--            android:parentActivityName=".ui.worksheet.EditWorksheetActivity">-->
+<!--        </activity>-->
 
     </application>
 

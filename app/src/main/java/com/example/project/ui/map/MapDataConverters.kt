@@ -68,4 +68,17 @@ class MapDataConverters {
         val type = object : TypeToken<List<RouteInfo>>() {}.type
         return gson.fromJson(json, type)
     }
+
+    // Convert List<FirebaseLatLng> to JSON string
+    @TypeConverter
+    fun fromFirebaseLatLngList(value: List<FirebaseLatLng>?): String {
+        return gson.toJson(value)
+    }
+
+    // Convert JSON string to List<FirebaseLatLng>
+    @TypeConverter
+    fun toFirebaseLatLngList(value: String): List<FirebaseLatLng> {
+        val listType = object : TypeToken<List<FirebaseLatLng>>() {}.type
+        return gson.fromJson(value, listType)
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.project.ui.drivermanager
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,10 @@ import androidx.navigation.fragment.findNavController
 import com.example.project.R
 import com.example.project.ui.map.MapData
 import com.example.project.ui.map.MapDataDatabase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -25,6 +30,7 @@ class DriverManagerFragment : Fragment() {
     private lateinit var adapter: ArrayAdapter<String>
     private val driverList = mutableListOf<String>() // List to store driver names
     private val driverIdList = mutableListOf<Long>() // List to store driver IDs
+    private val firebaseDatabase = FirebaseDatabase.getInstance() // Firebase instance
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,9 +42,11 @@ class DriverManagerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val accountType = 0 // For testing purposes only
+        val sharedPreferences: SharedPreferences =
+            requireContext().getSharedPreferences("AppPrefs", androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE)
+        val accountType = sharedPreferences.getInt("accountType", -1)
 
-        if (accountType != 0) {
+        if (accountType == -1) {
             // Show unauthorized dialog and navigate back
             showUnauthorizedDialog()
             return
@@ -55,7 +63,11 @@ class DriverManagerFragment : Fragment() {
         driverListView.adapter = adapter
 
         // Fetch drivers from the database
-        fetchDrivers()
+        if (accountType == 0) {
+            fetchDriversFromFirebase()
+        } else if (accountType == 1) {
+            fetchDriversFromLocalDatabase()
+        }
 
         // Set click listener for each driver
         driverListView.setOnItemClickListener { _, _, position, _ ->
@@ -64,7 +76,7 @@ class DriverManagerFragment : Fragment() {
         }
     }
 
-    private fun fetchDrivers() {
+    private fun fetchDriversFromLocalDatabase() {
         val dao = MapDataDatabase.getDatabase(requireContext()).mapDataDao()
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -87,7 +99,37 @@ class DriverManagerFragment : Fragment() {
             }
         }
     }
+    private fun fetchDriversFromFirebase() {
+        val driversRef = firebaseDatabase.reference.child("routes")
 
+        driversRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                driverList.clear()
+                driverIdList.clear()
+
+                // Iterate through Firebase snapshot
+                for (child in snapshot.children) {
+                    val mapData = child.getValue(MapData::class.java)
+                    if (mapData != null) {
+                        driverList.add(mapData.name) // Add driver names
+                        driverIdList.add(mapData.id) // Add corresponding IDs
+                    }
+                }
+
+                // Notify the adapter of data changes
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle Firebase database error
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Error")
+                    .setMessage("Failed to fetch drivers: ${error.message}")
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+        })
+    }
     private fun navigateToDriverRoute(driverId: Long) {
         // Start DriverRouteActivity with the driverId
         val intent = Intent(requireContext(), DriverRouteActivity::class.java).apply {

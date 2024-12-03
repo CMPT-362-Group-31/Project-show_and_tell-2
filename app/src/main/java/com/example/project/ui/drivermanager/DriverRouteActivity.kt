@@ -1,18 +1,24 @@
 package com.example.project.ui.drivermanager
 
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.lifecycleScope
 import com.example.project.R
+import com.example.project.Util.toLatLng
+import com.example.project.ui.map.FirebaseLatLng
 import com.example.project.ui.map.MapData
 import com.example.project.ui.map.MapDataDatabase
 import com.example.project.ui.map.MapDataRepository
 import com.example.project.ui.map.MapDataViewModel
 import com.example.project.ui.map.MapDataViewModelFactory
+import com.example.project.ui.map.RouteInfo
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -20,6 +26,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -32,6 +39,8 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var deleteButton: Button
     private lateinit var routeListView: ListView
     private val routeInfoList = mutableListOf<String>()
+    private val firebaseDatabase = FirebaseDatabase.getInstance()
+    private lateinit var cancelButton: Button
 
     private val mapDataViewModel: MapDataViewModel by viewModels {
         MapDataViewModelFactory(MapDataRepository(MapDataDatabase.getDatabase(this).mapDataDao()))
@@ -44,6 +53,7 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         // Initialize the views
         deleteButton = findViewById(R.id.DeleteButton)
         routeListView = findViewById(R.id.ListView)
+        cancelButton = findViewById(R.id.CancelButton)
 
         // Get the driver ID passed via Intent
         driverId = intent.getLongExtra("driverId", -1)
@@ -52,16 +62,27 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        val sharedPreferences: SharedPreferences =
+            getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val accountType = sharedPreferences.getInt("accountType", -1)
+
         // Fetch the driver route data
-        fetchDriverData()
+        if (accountType == 0) {
+            fetchDriverDataFromFirebase()
+        } else if (accountType == 1) {
+            fetchDriverDataFromLocalDatabase()
+        }
 
         // Set up delete button click
         deleteButton.setOnClickListener {
             deleteDriverData()
         }
+        cancelButton.setOnClickListener {
+            finish()
+        }
     }
 
-    private fun fetchDriverData() {
+    private fun fetchDriverDataFromLocalDatabase() {
         lifecycleScope.launch {
             val mapData = withContext(Dispatchers.IO) {
                 mapDataViewModel.getMapDataById(driverId)
@@ -78,6 +99,75 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun fetchDriverDataFromFirebase() {
+        val driversRef = firebaseDatabase.reference.child("routes").orderByChild("id").equalTo(driverId.toDouble())
+
+        driversRef.get().addOnSuccessListener { snapshot ->
+            Log.d("FirebaseData", "Query executed for driverId: $driverId")
+            if (snapshot.exists()) {
+                for (child in snapshot.children) {
+                    val mapDataSnapshot = child.value as? Map<String, Any>
+                    if (mapDataSnapshot != null) {
+                        val mapData = parseMapData(mapDataSnapshot)
+                        if (mapData != null) {
+                            populateRouteList(mapData)
+                            drawRouteOnMap(mapData)
+                        } else {
+                            Log.e("FirebaseData", "Failed to parse MapData.")
+                            showNoDataFound()
+                        }
+                    } else {
+                        Log.e("FirebaseData", "Snapshot is null or not a valid Map.")
+                        showNoDataFound()
+                    }
+                }
+            } else {
+                Log.d("FirebaseData", "No matching data found for driverId: $driverId")
+                showNoDataFound()
+            }
+        }.addOnFailureListener { error ->
+            Log.e("FirebaseData", "Error fetching data from Firebase: ${error.message}")
+            routeInfoList.clear()
+            routeInfoList.add("Error fetching data from Firebase.")
+            updateRouteListView()
+        }
+    }
+
+    private fun parseMapData(snapshot: Map<String, Any>): MapData? {
+        return try {
+            val id = (snapshot["id"] as? Number)?.toLong() ?: 0L
+            val name = snapshot["name"] as? String ?: ""
+            val routesRaw = snapshot["routes"] as? List<Map<String, Any>>
+            Log.d("FirebaseData", "Routes raw data: $routesRaw")
+
+            val routes = routesRaw?.map {
+                RouteInfo(
+                    destination = it["destination"] as String,
+                    departureTime = it["departureTime"] as String,
+                    estimatedArrivalTime = it["estimatedArrivalTime"] as String,
+                    arrivalTime = it["arrivalTime"] as String,
+                    status = it["status"] as String
+                )
+            }?.toMutableList() ?: mutableListOf()
+            val pathPoints = (snapshot["pathPoints"] as List<Map<String, Any>>).map {
+                FirebaseLatLng(
+                    latitude = (it["lat"] as Number).toDouble(),
+                    longitude = (it["lng"] as Number).toDouble()
+                )
+            }
+            Log.d("FirebaseData", "Parsed Routes: $routes")
+            MapData(id = id, name = name,  routeInfoList = routes, pathPoints = pathPoints)
+        } catch (e: Exception) {
+            Log.e("FirebaseData", "Error parsing MapData: ${e.message}")
+            null
+        }
+    }
+
+    private fun showNoDataFound() {
+        routeInfoList.clear()
+        routeInfoList.add("No route data found for this driver.")
+        updateRouteListView()
+    }
 
     private fun populateRouteList(mapData: MapData) {
         // Convert route information into a displayable format
@@ -100,19 +190,16 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun drawRouteOnMap(mapData: MapData) {
         if (mapData.pathPoints.isNotEmpty()) {
-            val polylineOptions = PolylineOptions().color(android.graphics.Color.BLUE).width(5f)
+            // Convert FirebaseLatLng to LatLng for Google Maps
+            val latLngPoints = mapData.pathPoints.map { it.toLatLng() }
 
-            // Add all points to the polyline
-            mapData.pathPoints.forEach { latLng ->
-                polylineOptions.add(latLng)
-            }
-
-            // Draw the polyline
+            // Draw polyline
+            val polylineOptions = PolylineOptions().addAll(latLngPoints).color(android.graphics.Color.BLUE).width(5f)
             mMap.addPolyline(polylineOptions)
 
-            // Add markers for the start and end points
-            val startPoint = mapData.pathPoints.first()
-            val endPoint = mapData.pathPoints.last()
+            // Add markers for start and end points
+            val startPoint = latLngPoints.first()
+            val endPoint = latLngPoints.last()
 
             mMap.addMarker(
                 MarkerOptions()
@@ -125,10 +212,11 @@ class DriverRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     .title("End")
             )
 
-            // Move the camera to the start point
+            // Move camera to start point
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12f))
         }
     }
+
 
     private fun deleteDriverData() {
         lifecycleScope.launch(Dispatchers.IO) {

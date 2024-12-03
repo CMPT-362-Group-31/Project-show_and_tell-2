@@ -8,7 +8,7 @@
         android:icon="@drawable/ic_map"
         android:title="Map" />
     <item
-        android:id="@+id/nav_worksheet"
+        android:id="@+id/worksheetFragment"
         android:icon="@drawable/ic_worksheet"
         android:title="Worksheet" />
     <item

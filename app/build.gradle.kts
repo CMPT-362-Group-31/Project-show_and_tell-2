@@ -5,6 +5,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id ("kotlin-parcelize")
 //    id("com.android.application")
+    id("androidx.navigation.safeargs.kotlin")
     id ("com.google.gms.google-services")
 
 }
@@ -78,6 +79,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.espresso.core)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -118,18 +121,19 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.0")
 
     // Gmail and Google Sign-In dependencies
+    implementation("com.google.android.gms:play-services-base:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.6.0")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
     implementation("com.google.api-client:google-api-client-gson:1.33.0")
     implementation("com.google.apis:google-api-services-gmail:v1-rev20231218-2.0.0")
 
+    implementation("com.google.android.gms:play-services-gcm:17.0.0")
     // Added dependencies for the worksheet UI
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-analytics")
-
-
+    implementation("com.google.firebase:firebase-database")
 
 }
