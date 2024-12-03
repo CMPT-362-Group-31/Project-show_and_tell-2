@@ -25,9 +25,11 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import com.google.api.services.gmail.GmailScopes
+import com.google.firebase.firestore.FirebaseFirestore
 
 class EmailActivity : AppCompatActivity() {
     private var account: GoogleSignInAccount? = null
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -189,8 +191,56 @@ class EmailActivity : AppCompatActivity() {
             )
             Text(
                 text = email.snippet ?: "No content available",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
+            Button(
+                onClick = { updateLinkedEmail(email) },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Link")
+            }
         }
+    }
+
+    /**
+     * Update the linked email in Firestore
+     */
+    private fun updateLinkedEmail(newEmail: Message) {
+        db.collection("emails")
+            .get()
+            .addOnSuccessListener { result ->
+                // Delete existing linked email if any
+                for (document in result) {
+                    db.collection("emails").document(document.id).delete()
+                }
+
+                // Add the new email
+                saveEmailToFirestore(newEmail)
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to update linked email: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    /**
+     * Save the selected email to Firestore
+     */
+    private fun saveEmailToFirestore(email: Message) {
+        val emailData = mapOf(
+            "subject" to (email.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject"),
+            "from" to (email.payload.headers.find { it.name == "From" }?.value ?: "Unknown"),
+            "snippet" to (email.snippet ?: ""),
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        db.collection("emails")
+            .add(emailData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Email linked successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to link email: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 }
