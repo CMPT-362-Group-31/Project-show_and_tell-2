@@ -1,5 +1,6 @@
 package com.example.project.ui.worksheet
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,12 +39,31 @@ class WorksheetFragment : Fragment() {
         setupRecyclerView()
         fetchWorksheets()
         setupFilterChips()
+        // Set click listener for FAB
+        binding.fabAddWorksheet.setOnClickListener {
+            navigateToEditWorksheet(null)
+        }
     }
+    private fun navigateToEditWorksheet(worksheetId: String?) {
+        findNavController().navigate(
+            WorksheetFragmentDirections.actionWorksheetFragmentToEditWorksheetFragment(worksheetId)
+        )
+    }
+
 
     private fun setupRecyclerView() {
         adapter = WorksheetAdapter { worksheet ->
-            // Handle item click
+            Log.d("WorksheetFragment", "Clicked on worksheet: ${worksheet.id}")
+            findNavController().navigate(
+                WorksheetFragmentDirections.actionWorksheetFragmentToEditWorksheetFragment(worksheet.id)
+            )
         }
+
+        binding.worksheetList.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@WorksheetFragment.adapter
+        }
+
 
         binding.worksheetList.layoutManager = LinearLayoutManager(requireContext())
         binding.worksheetList.adapter = adapter
@@ -53,7 +73,13 @@ class WorksheetFragment : Fragment() {
         db.collection("worksheets")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("WorksheetFragment", "Error fetching worksheets", error)
+                    Log.e(TAG, "Error fetching worksheets", error)
+                    return@addSnapshotListener
+                }
+
+                // Ensure the fragment is still attached to its activity and view exists
+                if (!isAdded || _binding == null) {
+                    Log.w(TAG, "Fragment is not attached or binding is null")
                     return@addSnapshotListener
                 }
 
@@ -72,13 +98,14 @@ class WorksheetFragment : Fragment() {
                         )
                         worksheets.add(worksheet)
                     } catch (e: Exception) {
-                        Log.e("WorksheetFragment", "Error parsing document", e)
+                        Log.e(TAG, "Error parsing document", e)
                     }
                 }
 
-                applyFilters() // Apply filters immediately after fetching data
+                applyFilters() // Safe to call since binding is checked
             }
     }
+
 
     private fun setupFilterChips() {
         val filterListener = { _: View ->

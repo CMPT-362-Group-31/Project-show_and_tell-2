@@ -41,6 +41,9 @@ class EditWorksheetFragment : Fragment() {
     private lateinit var editDropoffLocation: TextInputEditText
     private lateinit var pickupTypeGroup: ChipGroup // Pickup Type ChipGroup
     private lateinit var crewTypeGroup: ChipGroup // Crew Type ChipGroup
+    private lateinit var editDriverId: TextInputEditText
+    private lateinit var editDriverName: TextInputEditText
+
     private lateinit var btnSave: View
     private lateinit var btnDelete: View
 
@@ -80,6 +83,10 @@ class EditWorksheetFragment : Fragment() {
         crewTypeGroup = view.findViewById(R.id.crew_type_group) // Initialize crew type ChipGroup
         btnSave = view.findViewById(R.id.btn_save)
         btnDelete = view.findViewById(R.id.btn_delete)
+
+        // Initialize driver fields
+        editDriverId = view.findViewById(R.id.edit_driver_id) // Add this
+        editDriverName = view.findViewById(R.id.edit_driver_name) // Add this
 
         worksheetId?.let { worksheetNumber.text = it }
     }
@@ -153,6 +160,8 @@ class EditWorksheetFragment : Fragment() {
                     editTime.setText(document.getString("time"))
                     editPickupLocation.setText(document.getString("pickupLocation"))
                     editDropoffLocation.setText(document.getString("dropoffLocation"))
+                    editDriverId.setText(document.getString("driverId"))
+                    editDriverName.setText(document.getString("driverName"))
 
                     // Restore selection for pickup type
                     when (document.getString("pickupType")) {
@@ -184,6 +193,8 @@ class EditWorksheetFragment : Fragment() {
         val selectedCrewTypeChip = if (crewTypeGroup.checkedChipId != View.NO_ID) {
             crewTypeGroup.findViewById<Chip>(crewTypeGroup.checkedChipId)
         } else null
+        val driverId = editDriverId.text.toString().trim()
+        val driverName = editDriverName.text.toString().trim()
 
         val pickupType = selectedPickupTypeChip?.text?.toString() ?: "None"
         val crewType = selectedCrewTypeChip?.text?.toString() ?: "None"
@@ -198,6 +209,8 @@ class EditWorksheetFragment : Fragment() {
             "dropoffLocation" to editDropoffLocation.text.toString(),
             "pickupType" to (selectedPickupTypeChip?.text?.toString() ?: ""),
             "crewType" to (selectedCrewTypeChip?.text?.toString() ?: ""),
+            "driverId" to driverId,
+            "driverName" to driverName,
             "timestamp" to System.currentTimeMillis()
         )
 
@@ -246,4 +259,5 @@ class EditWorksheetFragment : Fragment() {
             .setPositiveButton("OK", null)
             .show()
     }
+
 }
