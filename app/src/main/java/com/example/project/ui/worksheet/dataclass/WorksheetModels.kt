@@ -12,9 +12,10 @@ data class WorksheetListItem(
     val date: String = "",
     val time: String = "",
     val status: String = "Unassigned",
-    val assignedTo: String = "",
     val pickupDetails: PickupDetails = PickupDetails(),
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val driverId: String = "",
+    val driverName: String = ""
 ) : Parcelable
 
 @Parcelize
@@ -27,4 +28,5 @@ data class PickupDetails(
     val from: String = "",      // pickup location
     val stop: String = "",      // additional stops (comma separated)
     val to: String = ""         // dropoff location
+
 ) : Parcelable

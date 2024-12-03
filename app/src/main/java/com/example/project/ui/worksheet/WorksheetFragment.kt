@@ -99,7 +99,7 @@ class WorksheetFragment : Fragment() {
                     return@addSnapshotListener
                 }
 
-                // Ensure `binding` is still valid
+                // Ensure the fragment's view is still valid
                 if (_binding == null) {
                     Log.w(TAG, "fetchWorksheets called after view was destroyed")
                     return@addSnapshotListener
@@ -115,7 +115,8 @@ class WorksheetFragment : Fragment() {
                             date = doc.getString("date") ?: "",
                             time = doc.getString("time") ?: "",
                             status = doc.getString("status") ?: "Unassigned",
-                            assignedTo = doc.getString("assignedTo") ?: "",
+                            driverId = doc.getString("driverId") ?: "",
+                            driverName = doc.getString("driverName") ?: "",
                             pickupDetails = doc.get("pickupDetails")?.let { details ->
                                 val map = details as Map<*, *>
                                 PickupDetails(
@@ -136,10 +137,15 @@ class WorksheetFragment : Fragment() {
                     }
                 }
 
-                adapter.submitList(ArrayList(worksheets))
+                // Update UI safely
+                binding.worksheetList.adapter?.let {
+                    adapter.submitList(ArrayList(worksheets))
+                }
                 binding.emptyState.visibility = if (worksheets.isEmpty()) View.VISIBLE else View.GONE
             }
     }
+
+
 
 
     override fun onDestroyView() {

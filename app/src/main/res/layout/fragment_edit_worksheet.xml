@@ -42,13 +42,6 @@
                     android:text="W 110724002"
                     android:textColor="@android:color/darker_gray" />
 
-                <ImageButton
-                    android:id="@+id/btn_close"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Close"
-                    android:src="@drawable/ic_close" />
             </LinearLayout>
 
             <!-- Email Button Row -->
@@ -478,6 +471,48 @@
                     android:text="INT" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp"
+            android:weightSum="2"> <!-- Updated to distribute weights equally -->
+
+            <!-- Driver ID Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/driver_id_input_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Driver ID">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_driver_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Spacing between fields -->
+            <View
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <!-- Driver Name Field -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Driver Name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_driver_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
 
         <!-- Action Buttons Section -->
         <!-- Action Buttons Section -->

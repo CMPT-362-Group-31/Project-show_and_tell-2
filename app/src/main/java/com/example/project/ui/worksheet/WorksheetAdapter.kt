@@ -44,7 +44,7 @@ class WorksheetAdapter(
 
             // Set status with appropriate background
             status.text = if (worksheet.status == "In-Progress") {
-                "${worksheet.status} ${worksheet.assignedTo}"
+                "${worksheet.status} ${worksheet.driverName}"
             } else {
                 worksheet.status
             }

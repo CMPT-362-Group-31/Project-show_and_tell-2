@@ -35,6 +35,8 @@ class EditWorksheetFragment : Fragment() {
     private lateinit var worksheetNumber: TextView
     private lateinit var editDate: TextInputEditText
     private lateinit var editTime: TextInputEditText
+    private lateinit var editDriverId: TextInputEditText
+    private lateinit var editDriverName: TextInputEditText // Added Driver Name Field
     private lateinit var editPickupLocation: TextInputEditText
     private lateinit var editDropoffLocation: TextInputEditText
     private lateinit var btnSave: View
@@ -72,6 +74,8 @@ class EditWorksheetFragment : Fragment() {
         editTime = view.findViewById(R.id.edit_time)
         editPickupLocation = view.findViewById(R.id.edit_pickup_location)
         editDropoffLocation = view.findViewById(R.id.edit_dropoff_location)
+        editDriverId = view.findViewById(R.id.edit_driver_id) // Initialize Driver ID Field
+        editDriverName = view.findViewById(R.id.edit_driver_name) // Initialize Driver Name Field
         btnSave = view.findViewById(R.id.btn_save)
         btnDelete = view.findViewById(R.id.btn_delete)
 
@@ -126,6 +130,8 @@ class EditWorksheetFragment : Fragment() {
                     editTime.setText(document.getString("time"))
                     editPickupLocation.setText(document.getString("pickupLocation"))
                     editDropoffLocation.setText(document.getString("dropoffLocation"))
+                    editDriverId.setText(document.getString("driverId")) // Load Driver ID
+                    editDriverName.setText(document.getString("driverName")) // Load Driver Name
                 } else {
                     Log.e(TAG, "No data found for worksheet ID: $id")
                 }
@@ -147,6 +153,8 @@ class EditWorksheetFragment : Fragment() {
             "time" to editTime.text.toString(),
             "pickupLocation" to editPickupLocation.text.toString(),
             "dropoffLocation" to editDropoffLocation.text.toString(),
+            "driverId" to editDriverId.text.toString(), // Save Driver ID
+            "driverName" to editDriverName.text.toString(), // Save Driver Name
             "timestamp" to System.currentTimeMillis()
         )
 
@@ -188,7 +196,6 @@ class EditWorksheetFragment : Fragment() {
         } ?: showErrorDialog("Worksheet ID is missing. Cannot delete.")
     }
 
-
     private fun validateForm(): Boolean {
         var isValid = true
         if (editPickupLocation.text.isNullOrBlank()) {
@@ -197,6 +204,14 @@ class EditWorksheetFragment : Fragment() {
         }
         if (editDropoffLocation.text.isNullOrBlank()) {
             editDropoffLocation.error = "Dropoff location is required"
+            isValid = false
+        }
+        if (editDriverId.text.isNullOrBlank()) { // Validate Driver ID
+            editDriverId.error = "Driver ID is required"
+            isValid = false
+        }
+        if (editDriverName.text.isNullOrBlank()) { // Validate Driver Name
+            editDriverName.error = "Driver Name is required"
             isValid = false
         }
         return isValid
