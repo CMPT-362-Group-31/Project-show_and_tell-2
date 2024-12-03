@@ -1,15 +1,13 @@
 package com.example.project.ui.worksheet
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project.R
-import com.example.project.ui.worksheet.WorksheetDiffCallback
-import com.example.project.ui.worksheet.dataclass.WorksheetListItem
 
 class WorksheetAdapter(
     private val onItemClick: (WorksheetListItem) -> Unit
@@ -36,20 +34,22 @@ class WorksheetAdapter(
         private val status: TextView = view.findViewById(R.id.status)
 
         fun bind(worksheet: WorksheetListItem) {
-            // Set the data to views
-            worksheetType.text = "${worksheet.type} - ${worksheet.count}"
+            // Debug logs
+            Log.d("WorksheetAdapter", "pickupType: ${worksheet.pickupType}, crewType: ${worksheet.crewType}, ${worksheet.id}")
+
+            // Set the combined value
+            worksheetType.text = "${worksheet.pickupType} - ${worksheet.crewType}"
+
             worksheetId.text = worksheet.id
             date.text = worksheet.date
             time.text = worksheet.time
 
-            // Set status with appropriate background
             status.text = if (worksheet.status == "In-Progress") {
                 "${worksheet.status} ${worksheet.driverName}"
             } else {
                 worksheet.status
             }
 
-            // Set status background color based on status
             status.setBackgroundResource(
                 when (worksheet.status) {
                     "In-Progress" -> R.drawable.status_in_progress_background
@@ -59,6 +59,6 @@ class WorksheetAdapter(
 
             itemView.setOnClickListener { onItemClick(worksheet) }
         }
+
     }
 }
-

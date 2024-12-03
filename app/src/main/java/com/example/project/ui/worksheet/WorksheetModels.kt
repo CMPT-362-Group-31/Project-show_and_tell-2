@@ -1,5 +1,4 @@
-package com.example.project.ui.worksheet.dataclass
-
+package com.example.project.ui.worksheet
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -15,7 +14,9 @@ data class WorksheetListItem(
     val pickupDetails: PickupDetails = PickupDetails(),
     val timestamp: Long = System.currentTimeMillis(),
     val driverId: String = "",
-    val driverName: String = ""
+    val driverName: String = "",
+    val pickupType: String = "",  // New field for selected pickup type
+    val crewType: String = ""     // New field for selected crew type
 ) : Parcelable
 
 @Parcelize
@@ -28,5 +29,4 @@ data class PickupDetails(
     val from: String = "",      // pickup location
     val stop: String = "",      // additional stops (comma separated)
     val to: String = ""         // dropoff location
-
 ) : Parcelable

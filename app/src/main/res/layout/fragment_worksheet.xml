@@ -53,31 +53,39 @@
                 android:id="@+id/filterChips"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleLine="true">
+                app:singleSelection="false"> <!-- Allow multiple filters -->
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipCreatedDate"
+                    android:id="@+id/chipDateAscending"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Created Date"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"/>
+                    android:text="Date Ascending"
+                    style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipItemType"
+                    android:id="@+id/chipDateDescending"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Item Type"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"/>
+                    android:text="Date Descending"
+                    style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipTaskStatus"
+                    android:id="@+id/chipShowCrew"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Task Status"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"/>
+                    android:text="Show Crew"
+                    style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipShowPackage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Package"
+                    style="@style/Widget.MaterialComponents.Chip.Filter" />
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
+
 
     </com.google.android.material.appbar.AppBarLayout>
 

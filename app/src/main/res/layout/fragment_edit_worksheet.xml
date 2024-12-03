@@ -128,7 +128,8 @@
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/pickup_type_group"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:singleSelection="true"> <!-- Enforces single selection -->
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_crew"
@@ -136,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/crew"
                     android:checked="true"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_package"
@@ -145,6 +146,7 @@
                     android:text="@string/_package"
                     style="@style/Widget.MaterialComponents.Chip.Choice" />
             </com.google.android.material.chip.ChipGroup>
+
         </LinearLayout>
 
         <!-- Ship and Company Info Section -->
@@ -247,7 +249,8 @@
                 android:id="@+id/crew_type_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:singleSelection="true"> <!-- Enforces single selection -->
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_off_signers"
@@ -268,9 +271,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="@string/other_kind"
-                    style="@style/Widget.MaterialComponents.Chip.Choice" />
+                android:text="@string/other_kind"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
             </com.google.android.material.chip.ChipGroup>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"

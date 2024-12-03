@@ -3,7 +3,6 @@ package com.example.project.ui.worksheet
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +12,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project.R
-import com.example.project.ui.email.EmailActivity
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
@@ -34,19 +34,16 @@ class EditWorksheetFragment : Fragment() {
         }
     }
 
-    // UI components
     private lateinit var worksheetNumber: TextView
     private lateinit var editDate: TextInputEditText
     private lateinit var editTime: TextInputEditText
-    private lateinit var editDriverId: TextInputEditText
-    private lateinit var editDriverName: TextInputEditText // Added Driver Name Field
     private lateinit var editPickupLocation: TextInputEditText
     private lateinit var editDropoffLocation: TextInputEditText
+    private lateinit var pickupTypeGroup: ChipGroup // Pickup Type ChipGroup
+    private lateinit var crewTypeGroup: ChipGroup // Crew Type ChipGroup
     private lateinit var btnSave: View
     private lateinit var btnDelete: View
-    private lateinit var btnEmail: View // Added Email button
 
-    // Firestore reference
     private var worksheetId: String? = null
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -65,12 +62,9 @@ class EditWorksheetFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize UI components
         initializeViews(view)
-        // Set up listeners for UI interactions
         setupListeners()
 
-        // Load or generate worksheet data
         worksheetId?.let {
             loadWorksheetData(it)
         } ?: generateNewWorksheetId()
@@ -82,11 +76,10 @@ class EditWorksheetFragment : Fragment() {
         editTime = view.findViewById(R.id.edit_time)
         editPickupLocation = view.findViewById(R.id.edit_pickup_location)
         editDropoffLocation = view.findViewById(R.id.edit_dropoff_location)
-        editDriverId = view.findViewById(R.id.edit_driver_id) // Initialize Driver ID Field
-        editDriverName = view.findViewById(R.id.edit_driver_name) // Initialize Driver Name Field
+        pickupTypeGroup = view.findViewById(R.id.pickup_type_group) // Initialize pickup type ChipGroup
+        crewTypeGroup = view.findViewById(R.id.crew_type_group) // Initialize crew type ChipGroup
         btnSave = view.findViewById(R.id.btn_save)
         btnDelete = view.findViewById(R.id.btn_delete)
-        btnEmail = view.findViewById(R.id.btn_email) // Initialize Email button
 
         worksheetId?.let { worksheetNumber.text = it }
     }
@@ -98,12 +91,27 @@ class EditWorksheetFragment : Fragment() {
         btnSave.setOnClickListener { saveWorksheet() }
         btnDelete.setOnClickListener { deleteWorksheet() }
 
-        // Set click listener for Email button
-        btnEmail.setOnClickListener {
-            val intent = Intent(requireContext(), EmailActivity::class.java)
-            startActivity(intent)
+        // Listener for Pickup Type ChipGroup
+        pickupTypeGroup.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.chip_package -> {
+                    // Automatically set Crew Type to "Other Kind"
+                    crewTypeGroup.check(R.id.chip_other_kind)
+                }
+                R.id.chip_crew -> {
+                    // Automatically set Crew Type to "Off Signers"
+                    crewTypeGroup.check(R.id.chip_off_signers)
+                }
+            }
+        }
+
+        // Listener for Crew Type ChipGroup
+        crewTypeGroup.setOnCheckedChangeListener { group, checkedId ->
+            val selectedChip = group.findViewById<Chip>(checkedId)
+            Log.d(TAG, "Crew type selected: ${selectedChip?.text}")
         }
     }
+
 
     private fun generateNewWorksheetId() {
         val calendar = Calendar.getInstance()
@@ -145,8 +153,19 @@ class EditWorksheetFragment : Fragment() {
                     editTime.setText(document.getString("time"))
                     editPickupLocation.setText(document.getString("pickupLocation"))
                     editDropoffLocation.setText(document.getString("dropoffLocation"))
-                    editDriverId.setText(document.getString("driverId")) // Load Driver ID
-                    editDriverName.setText(document.getString("driverName")) // Load Driver Name
+
+                    // Restore selection for pickup type
+                    when (document.getString("pickupType")) {
+                        "Crew" -> pickupTypeGroup.check(R.id.chip_crew)
+                        "Package" -> pickupTypeGroup.check(R.id.chip_package)
+                    }
+
+                    // Restore selection for crew type
+                    when (document.getString("crewType")) {
+                        "Off Signers" -> crewTypeGroup.check(R.id.chip_off_signers)
+                        "On Signers" -> crewTypeGroup.check(R.id.chip_on_signers)
+                        "Other Kind" -> crewTypeGroup.check(R.id.chip_other_kind)
+                    }
                 } else {
                     Log.e(TAG, "No data found for worksheet ID: $id")
                 }
@@ -158,9 +177,18 @@ class EditWorksheetFragment : Fragment() {
     }
 
     private fun saveWorksheet() {
-        if (!validateForm()) {
-            return
-        }
+        val selectedPickupTypeChip = if (pickupTypeGroup.checkedChipId != View.NO_ID) {
+            pickupTypeGroup.findViewById<Chip>(pickupTypeGroup.checkedChipId)
+        } else null
+
+        val selectedCrewTypeChip = if (crewTypeGroup.checkedChipId != View.NO_ID) {
+            crewTypeGroup.findViewById<Chip>(crewTypeGroup.checkedChipId)
+        } else null
+
+        val pickupType = selectedPickupTypeChip?.text?.toString() ?: "None"
+        val crewType = selectedCrewTypeChip?.text?.toString() ?: "None"
+
+        Log.d("SaveDebug", "pickupType: $pickupType, crewType: $crewType")
 
         val worksheetData = mapOf(
             "id" to worksheetId,
@@ -168,8 +196,8 @@ class EditWorksheetFragment : Fragment() {
             "time" to editTime.text.toString(),
             "pickupLocation" to editPickupLocation.text.toString(),
             "dropoffLocation" to editDropoffLocation.text.toString(),
-            "driverId" to editDriverId.text.toString(), // Save Driver ID
-            "driverName" to editDriverName.text.toString(), // Save Driver Name
+            "pickupType" to (selectedPickupTypeChip?.text?.toString() ?: ""),
+            "crewType" to (selectedCrewTypeChip?.text?.toString() ?: ""),
             "timestamp" to System.currentTimeMillis()
         )
 
@@ -209,27 +237,6 @@ class EditWorksheetFragment : Fragment() {
                 .setNegativeButton("Cancel", null)
                 .show()
         } ?: showErrorDialog("Worksheet ID is missing. Cannot delete.")
-    }
-
-    private fun validateForm(): Boolean {
-        var isValid = true
-        if (editPickupLocation.text.isNullOrBlank()) {
-            editPickupLocation.error = "Pickup location is required"
-            isValid = false
-        }
-        if (editDropoffLocation.text.isNullOrBlank()) {
-            editDropoffLocation.error = "Dropoff location is required"
-            isValid = false
-        }
-        if (editDriverId.text.isNullOrBlank()) { // Validate Driver ID
-            editDriverId.error = "Driver ID is required"
-            isValid = false
-        }
-        if (editDriverName.text.isNullOrBlank()) { // Validate Driver Name
-            editDriverName.error = "Driver Name is required"
-            isValid = false
-        }
-        return isValid
     }
 
     private fun showErrorDialog(message: String) {
