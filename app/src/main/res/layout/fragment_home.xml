@@ -1,23 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment" >
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/textFirstName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="First Name: "
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/textLastName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Last Name: "
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/textEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Email Address: "
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/textPosition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Position: "
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+</LinearLayout>
