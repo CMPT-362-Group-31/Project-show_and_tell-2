@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -33,10 +34,10 @@ import com.google.android.gms.maps.model.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.Firebase
-import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -58,15 +59,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var startButton: View
     private lateinit var updateButton: View
     private lateinit var completeButton: View
-    val database = Firebase.database
+
+    private lateinit var sharedPreferences: SharedPreferences
+    private val firestore = FirebaseFirestore.getInstance()
+    private var driverID: String = ""
 
     private var mapData = MapData(
-        id = 1,
-        name = "Peter",
+        name = "",
         routeInfoList = mutableListOf(
-            RouteInfo(destination = "YVR Airport"),
-            RouteInfo(destination = "Downtown Vancouver"),
-            RouteInfo(destination = "SFU Burnaby")
+            RouteInfo(destination = ""),
+            RouteInfo(destination = "")
         )
     )
 
@@ -83,7 +85,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        sharedPreferences = requireContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        driverID = sharedPreferences.getString("username", "") ?: ""
+        Log.d("SharePreference", "DriverID: $driverID")
+        fetchWorksheetData()
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -100,6 +105,56 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         setupUpdateButton()
         setupCompleteButton()
     }
+    private fun fetchWorksheetData() {
+        Log.d("Firestore", "Fetching worksheets from Firestore for driverId: $driverID")
+
+        if (driverID.isEmpty()) {
+            Log.e("Firestore", "DriverID is empty. Cannot fetch worksheet data.")
+            return
+        }
+
+        firestore.collection("worksheets")
+            .whereEqualTo("driverId", driverID) // Use username as driverID
+            .get()
+            .addOnSuccessListener { result ->
+                if (result.isEmpty) {
+                    Log.d("Firestore", "No documents found for driverId: $driverID")
+                } else {
+                    for (document in result) {
+                        val fetchedDriverID = document.getString("driverId") ?: ""
+                        val driverName = document.getString("driverName") ?: ""
+                        val to = document.getString("dropoffLocation") ?: ""
+                        val from = document.getString("pickupLocation") ?: ""
+
+                        // Log details for debugging
+                        Log.d("Firestore", "DriverID: $fetchedDriverID")
+                        Log.d("Firestore", "DriverName: $driverName")
+                        Log.d("Firestore", "Route From: $from")
+                        Log.d("Firestore", "Route To: $to")
+
+                        // Build routeInfoList from 'from' and 'to'
+                        val routeInfoList = mutableListOf<RouteInfo>().apply {
+                            add(RouteInfo(destination = from))
+                            add(RouteInfo(destination = to))
+                        }
+
+                        // Create a MapData object
+                        mapData = MapData(
+                            name = driverName,
+                            routeInfoList = routeInfoList,
+                        )
+
+                        // Log the mapData object for further debugging
+                        Log.d("Firestore", "MapData: $mapData")
+                        Log.d("Firestore", "Worksheet data successfully fetched and displayed.")
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching worksheet data: ${e.message}")
+            }
+    }
+
 
     private fun checkLocationPermissions() {
         if (ActivityCompat.checkSelfPermission(
@@ -167,27 +222,45 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mMap = googleMap
         isMapReady = true
 
+        // Fetch current location and set up markers for the route
         fetchCurrentLocation { location ->
             if (location != null) {
                 currentLocation = location
 
                 val origin = "${currentLocation!!.latitude},${currentLocation!!.longitude}"
-                val waypointNames = listOf("YVR Airport", "Downtown Vancouver")
-                val destinationName = "SFU Burnaby"
 
-                resolvePlacesToCoordinates(waypointNames, destinationName) { waypoints, destination ->
-                    if (waypoints.isNotEmpty() && destination != null) {
-                        directionsViewModel.fetchRoute(origin, destination, waypoints.joinToString("|"))
-                        addMarkersForRoute(waypoints, destination)
+                // Assuming the route information is already populated in `mapData.routeInfoList`
+                if (mapData.routeInfoList.isNotEmpty()) {
+                    val waypoints = mapData.routeInfoList.dropLast(1).map { it.destination }
+                    val destinationName = mapData.routeInfoList.last().destination
+                    Log.d("MapFragment", "Waypoints: ${waypoints.joinToString(", ")}")
+                    Log.d("MapFragment", "DestinationName: $destinationName")
+                    if (waypoints.isEmpty() || destinationName.isEmpty()) {
+                        Log.e("MapFragment", "Waypoints or destinationName are invalid. Skipping route resolution.")
+                        return@fetchCurrentLocation
                     } else {
-                        Log.e("MapFragment", "Failed to resolve places")
+                        // Log waypoints and destinationName for debugging
+                        Log.d("MapFragment", "Waypoints: ${waypoints.joinToString(", ")}")
+                        Log.d("MapFragment", "DestinationName: $destinationName")
                     }
+                    resolvePlacesToCoordinates(waypoints, destinationName) { resolvedWaypoints, resolvedDestination ->
+                        if (resolvedWaypoints.isNotEmpty() && resolvedDestination != null) {
+                            // Fetch route and draw polyline
+                            directionsViewModel.fetchRoute(origin, resolvedDestination, resolvedWaypoints.joinToString("|"))
+                            addMarkersForRoute(resolvedWaypoints, resolvedDestination)
+                        } else {
+                            Log.e("MapFragment", "Failed to resolve route details.")
+                        }
+                    }
+                } else {
+                    Log.e("MapFragment", "No route info available in mapData.")
                 }
             } else {
-                Log.e("MapFragment", "Failed to get current location")
+                Log.e("MapFragment", "Failed to get current location.")
             }
         }
     }
+
 
     private fun fetchCurrentLocation(callback: (Location?) -> Unit) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
@@ -219,34 +292,55 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         destinationName: String,
         callback: (waypoints: List<String>, destination: String?) -> Unit
     ) {
+        if (waypointNames.isEmpty() || destinationName.isEmpty()) {
+            Log.e("MapFragment", "Invalid input: waypoints or destination is empty")
+            callback(emptyList(), null)
+            return
+        }
+
         val resolvedWaypoints = mutableListOf<String>()
         var resolvedDestination: String? = null
-
-        val unresolvedCount = waypointNames.size + 1
         var resolvedCount = 0
+        val totalToResolve = waypointNames.size + 1
 
         waypointNames.forEach { placeName ->
+            if (placeName.isEmpty()) {
+                Log.e("MapFragment", "Empty waypoint name provided")
+                resolvedCount++
+                if (resolvedCount == totalToResolve) {
+                    callback(resolvedWaypoints, resolvedDestination)
+                }
+                return@forEach
+            }
+
             directionsViewModel.getLatLngForPlace(placeName) { latLng ->
-                latLng?.let {
-                    resolvedWaypoints.add("${it.latitude},${it.longitude}")
+                if (latLng != null) {
+                    resolvedWaypoints.add("${latLng.latitude},${latLng.longitude}")
+                    Log.d("MapFragment", "Resolved waypoint: $placeName -> $latLng")
+                } else {
+                    Log.e("MapFragment", "Failed to resolve waypoint: $placeName")
                 }
                 resolvedCount++
-                if (resolvedCount == unresolvedCount) {
+                if (resolvedCount == totalToResolve) {
                     callback(resolvedWaypoints, resolvedDestination)
                 }
             }
         }
 
         directionsViewModel.getLatLngForPlace(destinationName) { latLng ->
-            latLng?.let {
-                resolvedDestination = "${it.latitude},${it.longitude}"
+            if (latLng != null) {
+                resolvedDestination = "${latLng.latitude},${latLng.longitude}"
+                Log.d("MapFragment", "Resolved destination: $destinationName -> $latLng")
+            } else {
+                Log.e("MapFragment", "Failed to resolve destination: $destinationName")
             }
             resolvedCount++
-            if (resolvedCount == unresolvedCount) {
+            if (resolvedCount == totalToResolve) {
                 callback(resolvedWaypoints, resolvedDestination)
             }
         }
     }
+
 
     private fun updateMapLocation() {
         currentLocation?.let { location ->
