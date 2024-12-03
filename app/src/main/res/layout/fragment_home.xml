@@ -6,35 +6,35 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/textFirstName"
+        android:id="@+id/textTotalCrew"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="First Name: "
-        android:textStyle="bold"
-        android:textSize="16sp" />
+        android:text="Total Crew Worksheets: 0"
+        android:textSize="18sp"
+        android:padding="8dp" />
 
     <TextView
-        android:id="@+id/textLastName"
+        android:id="@+id/textTotalPackage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Last Name: "
-        android:textStyle="bold"
-        android:textSize="16sp" />
+        android:text="Total Package Worksheets: 0"
+        android:textSize="18sp"
+        android:padding="8dp" />
 
     <TextView
-        android:id="@+id/textEmailAddress"
+        android:id="@+id/textActiveDrivers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Email Address: "
-        android:textStyle="bold"
-        android:textSize="16sp" />
+        android:text="Active Drivers: 0"
+        android:textSize="18sp"
+        android:padding="8dp" />
 
     <TextView
-        android:id="@+id/textPosition"
+        android:id="@+id/textCompletedWorksheets"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Position: "
-        android:textStyle="bold"
-        android:textSize="16sp" />
+        android:text="Completed Worksheets: 0"
+        android:textSize="18sp"
+        android:padding="8dp" />
 
 </LinearLayout>
