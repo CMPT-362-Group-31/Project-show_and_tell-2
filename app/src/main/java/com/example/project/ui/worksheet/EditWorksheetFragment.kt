@@ -3,15 +3,18 @@ package com.example.project.ui.worksheet
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project.R
+import com.example.project.ui.email.EmailActivity
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
@@ -97,6 +100,12 @@ class EditWorksheetFragment : Fragment() {
 
         btnSave.setOnClickListener { saveWorksheet() }
         btnDelete.setOnClickListener { deleteWorksheet() }
+
+        // Add listener for Email button
+        view?.findViewById<Button>(R.id.btn_link_email)?.setOnClickListener {
+            val intent = Intent(requireContext(), EmailActivity::class.java)
+            startActivity(intent)
+        }
 
         // Listener for Pickup Type ChipGroup
         pickupTypeGroup.setOnCheckedChangeListener { group, checkedId ->

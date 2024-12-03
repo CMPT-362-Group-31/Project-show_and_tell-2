@@ -562,7 +562,7 @@
 
                     <!-- Link Worksheet button -->
                     <Button
-                        android:id="@+id/btn_link_worksheet"
+                        android:id="@+id/btn_link_email"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/link_worksheet"
@@ -589,7 +589,7 @@
 
                     <!-- Email button -->
                     <Button
-                        android:id="@+id/btn_email"
+                        android:id="@+id/btn_view_email"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/email"
