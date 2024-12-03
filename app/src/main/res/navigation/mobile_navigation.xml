@@ -23,6 +23,13 @@
             app:destination="@id/editWorksheetFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/emailViewerFragment"
+        android:name="com.example.project.ui.email.EmailViewerFragment"
+        android:label="Email Viewer"
+        tools:layout="@layout/fragment_email_viewer" />
+
+
     <!-- Edit Worksheet Fragment -->
     <fragment
         android:id="@+id/editWorksheetFragment"
@@ -40,6 +47,9 @@
             app:destination="@id/worksheetFragment"
             app:popUpTo="@id/worksheetFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_editWorksheetFragment_to_emailViewerFragment"
+            app:destination="@id/emailViewerFragment" />
     </fragment>
 
     <fragment

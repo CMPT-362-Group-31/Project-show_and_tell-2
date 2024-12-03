@@ -536,29 +536,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- Delete button -->
-                    <Button
-                        android:id="@+id/btn_delete"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/delete"
-                        android:drawableStart="@drawable/ic_trash"
-                        android:drawablePadding="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:textAllCaps="false"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
-                    <!-- Save Picture button -->
-                    <Button
-                        android:id="@+id/btn_save_picture"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/save_picture"
-                        android:drawableStart="@drawable/ic_image"
-                        android:drawablePadding="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:textAllCaps="false"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
                     <!-- Link Worksheet button -->
                     <Button
@@ -566,6 +544,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/link_worksheet"
+                        android:layout_marginEnd="8dp"
+                        android:textAllCaps="false"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    <!-- Email button -->
+                    <Button
+                        android:id="@+id/btn_view_email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/email"
+                        android:drawableStart="@drawable/ic_email"
+                        android:drawablePadding="8dp"
                         android:layout_marginEnd="8dp"
                         android:textAllCaps="false"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
@@ -587,13 +577,13 @@
                         android:textAllCaps="false"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
-                    <!-- Email button -->
+                    <!-- Delete button -->
                     <Button
-                        android:id="@+id/btn_view_email"
+                        android:id="@+id/btn_delete"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/email"
-                        android:drawableStart="@drawable/ic_email"
+                        android:text="@string/delete"
+                        android:drawableStart="@drawable/ic_trash"
                         android:drawablePadding="8dp"
                         android:layout_marginEnd="8dp"
                         android:textAllCaps="false"

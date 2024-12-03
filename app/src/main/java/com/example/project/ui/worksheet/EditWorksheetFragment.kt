@@ -104,7 +104,18 @@ class EditWorksheetFragment : Fragment() {
         // Add listener for Email button
         view?.findViewById<Button>(R.id.btn_link_email)?.setOnClickListener {
             val intent = Intent(requireContext(), EmailActivity::class.java)
+            Log.d(TAG, "Passing worksheetId: $worksheetId")
+            intent.putExtra("WORKSHEET_ID", worksheetId)
             startActivity(intent)
+        }
+
+        view?.findViewById<Button>(R.id.btn_view_email)?.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_editWorksheetFragment_to_emailViewerFragment,
+                Bundle().apply {
+                    putString("worksheetId", worksheetId)
+                }
+            )
         }
 
         // Listener for Pickup Type ChipGroup

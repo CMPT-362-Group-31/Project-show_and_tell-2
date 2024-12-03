@@ -1,6 +1,8 @@
 package com.example.project.ui.email
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.project.ui.worksheet.EditWorksheetFragment
+import com.example.project.ui.worksheet.EditWorksheetFragment.Companion
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -30,10 +34,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 class EmailActivity : AppCompatActivity() {
     private var account: GoogleSignInAccount? = null
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
+    private var worksheetId: String? = null
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        worksheetId = intent?.getStringExtra("WORKSHEET_ID")
+        if (worksheetId == null && savedInstanceState != null) {
+            worksheetId = savedInstanceState.getString("WORKSHEET_ID")
+        }
+        Log.d("EmailActivity", "Final worksheetId: $worksheetId")
+
 
         // Google sign-in launcher
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -114,6 +125,10 @@ class EmailActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("WORKSHEET_ID", worksheetId)
+    }
     /**
      * Fetches email list from Gmail API
      */
@@ -195,10 +210,16 @@ class EmailActivity : AppCompatActivity() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Button(
-                onClick = { updateLinkedEmail(email) },
+                onClick = {
+                    if (worksheetId != null) {
+                        updateLinkedEmail(email)
+                    } else {
+                        Toast.makeText(this@EmailActivity, "Worksheet ID is missing", Toast.LENGTH_LONG).show()
+                    }
+                },
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Link")
+                Text("Link This Email")
             }
         }
     }
@@ -206,28 +227,46 @@ class EmailActivity : AppCompatActivity() {
     /**
      * Update the linked email in Firestore
      */
-    private fun updateLinkedEmail(newEmail: Message) {
-        db.collection("emails")
-            .get()
-            .addOnSuccessListener { result ->
-                // Delete existing linked email if any
-                for (document in result) {
-                    db.collection("emails").document(document.id).delete()
-                }
+    private fun updateLinkedEmail(email: Message) {
+        if (worksheetId == null) {
+            Toast.makeText(this, "Worksheet ID is missing", Toast.LENGTH_LONG).show()
+            return
+        }
 
-                // Add the new email
-                saveEmailToFirestore(newEmail)
+        val emailContent = email.snippet ?: "No content available"
+        val emailSubject = email.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject"
+        val emailSender = email.payload.headers.find { it.name == "From" }?.value ?: "Unknown"
+
+        val emailData = mapOf(
+            "worksheetId" to worksheetId,
+            "subject" to emailSubject,
+            "from" to emailSender,
+            "content" to emailContent,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        db.collection("emails")
+            .add(emailData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Email linked successfully to Worksheet ID: $worksheetId", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to update linked email: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Failed to link email: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+
 
     /**
      * Save the selected email to Firestore
      */
     private fun saveEmailToFirestore(email: Message) {
+        if (worksheetId == null) {
+            Toast.makeText(this, "Worksheet ID is missing", Toast.LENGTH_LONG).show()
+            return
+        }
+
         val emailData = mapOf(
+            "worksheetId" to worksheetId,
             "subject" to (email.payload.headers.find { it.name == "Subject" }?.value ?: "No Subject"),
             "from" to (email.payload.headers.find { it.name == "From" }?.value ?: "Unknown"),
             "snippet" to (email.snippet ?: ""),
@@ -243,4 +282,9 @@ class EmailActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to link email: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
+
+    companion object {
+        val TAG: String = "EmailActivity"
+    }
+
 }
