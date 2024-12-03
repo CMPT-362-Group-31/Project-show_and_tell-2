@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.project.R
 import com.example.project.ui.email.EmailActivity
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
@@ -45,6 +46,8 @@ class EditWorksheetFragment : Fragment() {
     private lateinit var btnSave: View
     private lateinit var btnDelete: View
     private lateinit var btnEmail: View // Added Email button
+    private lateinit var btnLinkWorksheet: MaterialButton // Added Link Worksheet button
+
 
     // Firestore reference
     private var worksheetId: String? = null
@@ -87,6 +90,8 @@ class EditWorksheetFragment : Fragment() {
         btnSave = view.findViewById(R.id.btn_save)
         btnDelete = view.findViewById(R.id.btn_delete)
         btnEmail = view.findViewById(R.id.btn_email) // Initialize Email button
+        btnLinkWorksheet = view.findViewById(R.id.btn_link_worksheet) // Initialize Link Worksheet button
+
 
         worksheetId?.let { worksheetNumber.text = it }
     }
@@ -102,6 +107,12 @@ class EditWorksheetFragment : Fragment() {
         btnEmail.setOnClickListener {
             val intent = Intent(requireContext(), EmailActivity::class.java)
             startActivity(intent)
+        }
+
+        // Set click listener for Link Worksheet button
+        btnLinkWorksheet.setOnClickListener {
+            // Show linked email details dialog
+            showLinkedEmailDialog()
         }
     }
 
@@ -235,6 +246,40 @@ class EditWorksheetFragment : Fragment() {
     private fun showErrorDialog(message: String) {
         AlertDialog.Builder(requireContext())
             .setTitle("Error")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun showLinkedEmailDialog() {
+        db.collection("emails")
+            .get()
+            .addOnSuccessListener { result ->
+                if (result.isEmpty) {
+                    // No linked email found
+                    showMessageDialog("No Linked Email", "You have not linked any email yet.")
+                } else {
+                    val emailDocument = result.documents.first()
+                    val subject = emailDocument.getString("subject") ?: "No Subject"
+                    val from = emailDocument.getString("from") ?: "Unknown Sender"
+                    val snippet = emailDocument.getString("snippet") ?: "No Content"
+
+                    // Display email content in a dialog
+                    showMessageDialog(
+                        "Linked Email Details",
+                        "Subject: $subject\n\nFrom: $from\n\nContent:\n$snippet"
+                    )
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error fetching linked email", e)
+                showMessageDialog("Error", "Failed to fetch linked email: ${e.message}")
+            }
+    }
+
+    private fun showMessageDialog(title: String, message: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
             .setMessage(message)
             .setPositiveButton("OK", null)
             .show()
