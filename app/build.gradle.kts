@@ -123,8 +123,8 @@ dependencies {
     // Gmail and Google Sign-In dependencies
     implementation("com.google.android.gms:play-services-base:18.0.1")
     implementation("com.google.android.gms:play-services-auth:20.6.0")
-    implementation("com.google.api-client:google-api-client-android:1.33.0")
-    implementation("com.google.api-client:google-api-client-gson:1.33.0")
+    implementation("com.google.api-client:google-api-client-android:1.33.2")
+    implementation("com.google.api-client:google-api-client-gson:1.33.2")
     implementation("com.google.apis:google-api-services-gmail:v1-rev20231218-2.0.0")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
