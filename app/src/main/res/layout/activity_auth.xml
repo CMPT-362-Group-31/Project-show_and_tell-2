@@ -64,14 +64,7 @@
                 android:padding="12dp"
                 android:layout_marginTop="16dp" />
 
-            <Button
-                android:id="@+id/signup_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sign Up"
-                android:minHeight="48dp"
-                android:padding="12dp"
-                android:layout_marginTop="8dp" />
+
         </LinearLayout>
 
     </ScrollView>

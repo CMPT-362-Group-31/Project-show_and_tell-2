@@ -32,7 +32,7 @@ class AuthActivity : AppCompatActivity() {
         val passwordInput: EditText = findViewById(R.id.password_input)
         val accountTypeGroup: RadioGroup = findViewById(R.id.account_type_group)
         val loginButton: Button = findViewById(R.id.login_button)
-        val signupButton: Button = findViewById(R.id.signup_button)
+
 
         loginButton.setOnClickListener {
             val email = usernameInput.text.toString().trim()
@@ -62,30 +62,30 @@ class AuthActivity : AppCompatActivity() {
                 }
         }
 
-        signupButton.setOnClickListener {
-            val email = usernameInput.text.toString().trim()
-            val password = passwordInput.text.toString().trim()
-            val selectedAccountType = when (accountTypeGroup.checkedRadioButtonId) {
-                R.id.agent_radio -> 0 // Admin account
-                R.id.driver_radio -> 1 // Driver account
-                else -> -1 // Invalid account type
-            }
-
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Firebase Authentication for Signup
-            firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Signup Successful! Please log in.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Signup Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-        }
+//        signupButton.setOnClickListener {
+//            val email = usernameInput.text.toString().trim()
+//            val password = passwordInput.text.toString().trim()
+//            val selectedAccountType = when (accountTypeGroup.checkedRadioButtonId) {
+//                R.id.agent_radio -> 0 // Admin account
+//                R.id.driver_radio -> 1 // Driver account
+//                else -> -1 // Invalid account type
+//            }
+//
+//            if (email.isEmpty() || password.isEmpty()) {
+//                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+//                return@setOnClickListener
+//            }
+//
+//            // Firebase Authentication for Signup
+//            firebaseAuth.createUserWithEmailAndPassword(email, password)
+//                .addOnCompleteListener { task ->
+//                    if (task.isSuccessful) {
+//                        Toast.makeText(this, "Signup Successful! Please log in.", Toast.LENGTH_SHORT).show()
+//                    } else {
+//                        Toast.makeText(this, "Signup Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//        }
     }
     private fun saveUser(accountType: Int,username: String) {
         sharedPreferences.edit()

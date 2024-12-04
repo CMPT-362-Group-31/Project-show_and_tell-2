@@ -401,12 +401,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_additional_stops"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add Additional Stop"
-                android:layout_marginTop="8dp"/>
+
 
             <LinearLayout
                 android:id="@+id/additional_stops_container"
